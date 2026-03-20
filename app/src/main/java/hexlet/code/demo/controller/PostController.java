@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -19,20 +20,21 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("/api/posts")
 public class PostController {
     private static List<Post> posts = new ArrayList<>();
 
-    @GetMapping("/posts")
+    @GetMapping
     public ResponseEntity<List<Post>> index(@RequestParam(defaultValue = "10") Integer limit ){
         var res = posts.stream().limit(limit).toList();
-        return ResponseEntity.ok(res);
+        return ResponseEntity.ok().header("X-Total-Count",String.valueOf(posts.size())).body(res);
     }
-    @GetMapping("/posts/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Post> show(@PathVariable String id){
         var res = posts.stream().filter(p -> p.getSlug().equals(id)).findFirst();
         return ResponseEntity.of(res);
     }
-    @PostMapping("/posts")
+    @PostMapping
     public ResponseEntity<Post> create(@Valid @RequestBody Post post){
         posts.add(post);
 
@@ -44,7 +46,7 @@ public class PostController {
 
         return ResponseEntity.created(location).body(post);
     }
-    @PutMapping("/posts/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<Post> update(@PathVariable String id, @Valid @RequestBody Post data){
         var maybePost = posts.stream()
                              .filter(p -> p.getSlug().equals(id))
@@ -59,7 +61,7 @@ public class PostController {
         }
         return ResponseEntity.notFound().build();
     }
-    @DeleteMapping("/posts/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable String id){
         if(posts.removeIf(p -> p.getSlug().equals(id))){
             return ResponseEntity.noContent().build();
