@@ -22,11 +22,14 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-devtools")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
 	compileOnly("org.projectlombok:lombok:1.18.44")
 	annotationProcessor("org.projectlombok:lombok:1.18.44")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
+
+	runtimeOnly("com.h2database:h2")
 }
 
 tasks.withType<Test> {

@@ -1,7 +1,9 @@
 package hexlet.code.demo.controller;
 
 import hexlet.code.demo.model.Post;
+import hexlet.code.demo.repository.PostRepository;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,55 +19,55 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/posts")
 public class PostController {
-    private static List<Post> posts = new ArrayList<>();
+    @Autowired
+    private PostRepository postRepository;
 
     @GetMapping
     public ResponseEntity<List<Post>> index(@RequestParam(defaultValue = "10") Integer limit ){
-        var res = posts.stream().limit(limit).toList();
-        return ResponseEntity.ok().header("X-Total-Count",String.valueOf(posts.size())).body(res);
+        var res = postRepository.findAll().stream().limit(limit).toList();
+        return ResponseEntity.ok().header("X-Total-Count",String.valueOf(postRepository.count())).body(res);
     }
     @GetMapping("/{id}")
-    public ResponseEntity<Post> show(@PathVariable String id){
-        var res = posts.stream().filter(p -> p.getSlug().equals(id)).findFirst();
+    public ResponseEntity<Post> show(@PathVariable Long id){
+        var res = postRepository.findById(id);
         return ResponseEntity.of(res);
     }
     @PostMapping
     public ResponseEntity<Post> create(@Valid @RequestBody Post post){
-        posts.add(post);
+        postRepository.save(post);
 
         URI location = ServletUriComponentsBuilder
             .fromCurrentRequest()
             .path("/{id}")
-            .buildAndExpand(post.getSlug())
+            .buildAndExpand(post.getId())
             .toUri();
 
         return ResponseEntity.created(location).body(post);
     }
     @PutMapping("/{id}")
-    public ResponseEntity<Post> update(@PathVariable String id, @Valid @RequestBody Post data){
-        var maybePost = posts.stream()
-                             .filter(p -> p.getSlug().equals(id))
-                             .findAny();
-        if(maybePost.isPresent()){
-            var page = maybePost.get();
-            page.setSlug(data.getSlug());
-            page.setTitle(data.getTitle());
-            page.setContent(data.getContent());
-            page.setAuthor(data.getAuthor());
-            return ResponseEntity.ok().body(data);
+    public ResponseEntity<Post> update(@PathVariable Long id, @Valid @RequestBody Post data){
+        var maybePost = postRepository.findById(id);
+        if(maybePost.isEmpty()){
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.notFound().build();
+        var post = maybePost.get();
+        post.setTitle(data.getTitle());
+        post.setContent(data.getContent());
+        post.setPublished(data.isPublished());
+
+        postRepository.save(post);
+        return ResponseEntity.ok(post);
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable String id){
-        if(posts.removeIf(p -> p.getSlug().equals(id))){
-            return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> delete(@PathVariable Long id){
+        if(!postRepository.existsById(id)){
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.notFound().build();
+        postRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }
