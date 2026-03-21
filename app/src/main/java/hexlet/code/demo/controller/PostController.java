@@ -38,7 +38,7 @@ public class PostController {
     }
     @PostMapping
     public ResponseEntity<Post> create(@Valid @RequestBody Post post){
-        postRepository.save(post);
+        var savedPost = postRepository.save(post);
 
         URI location = ServletUriComponentsBuilder
             .fromCurrentRequest()
@@ -46,7 +46,7 @@ public class PostController {
             .buildAndExpand(post.getId())
             .toUri();
 
-        return ResponseEntity.created(location).body(post);
+        return ResponseEntity.created(location).body(savedPost);
     }
     @PutMapping("/{id}")
     public ResponseEntity<Post> update(@PathVariable Long id, @Valid @RequestBody Post data){
@@ -59,8 +59,8 @@ public class PostController {
         post.setContent(data.getContent());
         post.setPublished(data.isPublished());
 
-        postRepository.save(post);
-        return ResponseEntity.ok(post);
+        var savedPost = postRepository.save(post);
+        return ResponseEntity.ok(savedPost);
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id){

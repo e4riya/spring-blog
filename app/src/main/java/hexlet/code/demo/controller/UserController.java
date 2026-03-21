@@ -33,8 +33,8 @@ public class UserController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public User createUser(@Valid @RequestBody User user) {
-        userRepository.save(user);
-        return user;
+        var savedUser = userRepository.save(user);
+        return savedUser;
     }
 
     @DeleteMapping
