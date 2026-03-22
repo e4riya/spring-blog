@@ -1,9 +1,11 @@
 package hexlet.code.demo.controller;
 
+import hexlet.code.demo.exception.ResourceNotFoundException;
 import hexlet.code.demo.model.Post;
 import hexlet.code.demo.repository.PostRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -23,38 +26,42 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/posts")
 public class PostController {
+
     @Autowired
     private PostRepository postRepository;
 
     @GetMapping
-    public ResponseEntity<List<Post>> index(@RequestParam(defaultValue = "10") Integer limit ){
+    public ResponseEntity<List<Post>> index(@RequestParam(defaultValue = "10") Integer limit) {
         var res = postRepository.findAll().stream().limit(limit).toList();
-        return ResponseEntity.ok().header("X-Total-Count",String.valueOf(postRepository.count())).body(res);
+        return ResponseEntity.ok()
+                             .header("X-Total-Count", String.valueOf(postRepository.count()))
+                             .body(res);
     }
+
     @GetMapping("/{id}")
-    public ResponseEntity<Post> show(@PathVariable Long id){
-        var res = postRepository.findById(id);
-        return ResponseEntity.of(res);
+    public Post show(@PathVariable Long id) {
+        return postRepository.findById(id)
+                             .orElseThrow(() -> new ResourceNotFoundException("Post with " + id + " not found"));
     }
+
     @PostMapping
-    public ResponseEntity<Post> create(@Valid @RequestBody Post post){
+    public ResponseEntity<Post> create(@Valid @RequestBody Post post) {
         var savedPost = postRepository.save(post);
 
         URI location = ServletUriComponentsBuilder
             .fromCurrentRequest()
             .path("/{id}")
-            .buildAndExpand(post.getId())
+            .buildAndExpand(savedPost.getId())
             .toUri();
 
         return ResponseEntity.created(location).body(savedPost);
     }
+
     @PutMapping("/{id}")
-    public ResponseEntity<Post> update(@PathVariable Long id, @Valid @RequestBody Post data){
-        var maybePost = postRepository.findById(id);
-        if(maybePost.isEmpty()){
-            return ResponseEntity.notFound().build();
-        }
-        var post = maybePost.get();
+    public ResponseEntity<Post> update(@PathVariable Long id, @Valid @RequestBody Post data) {
+        var post = postRepository.findById(id)
+                                 .orElseThrow(() -> new ResourceNotFoundException("Post with " + id + " not found"));
+
         post.setTitle(data.getTitle());
         post.setContent(data.getContent());
         post.setPublished(data.isPublished());
@@ -62,12 +69,13 @@ public class PostController {
         var savedPost = postRepository.save(post);
         return ResponseEntity.ok(savedPost);
     }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id){
-        if(!postRepository.existsById(id)){
-            return ResponseEntity.notFound().build();
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
+        if (!postRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Post with id " + id + " not found");
         }
         postRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
     }
 }

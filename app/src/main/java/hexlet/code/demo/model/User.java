@@ -6,7 +6,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,10 +26,13 @@ public class User {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @NotBlank
+
     @Column(unique = true, nullable = false)
+    @NotBlank
+    @Email
     private String email;
     @NotBlank
+    @Size(min = 1, max = 50)
     private String firstName;
     private String lastName;
     private LocalDateTime birthday;

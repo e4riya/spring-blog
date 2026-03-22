@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,6 +24,7 @@ public class Post {
     private Long id;
     @Column(nullable = false, unique = true)
     @NotBlank
+    @Size(max = 255)
     private String title;
     @Column(nullable = false)
     @NotBlank
