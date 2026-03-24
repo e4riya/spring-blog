@@ -2,6 +2,7 @@ package hexlet.code.demo.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,10 +13,15 @@ import jakarta.validation.constraints.Size;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "users")
 @Setter
 @Getter
@@ -26,14 +32,22 @@ public class User {
     @EqualsAndHashCode.Include
     private Long id;
 
-
     @Column(unique = true, nullable = false)
     @NotBlank
     @Email
     private String email;
+
     @NotBlank
     @Size(min = 1, max = 50)
     private String firstName;
+
     private String lastName;
     private LocalDateTime birthday;
+
+    @Column(nullable = false, updatable = false)
+    @CreatedDate
+    private LocalDate createdAt;
+
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
 }
