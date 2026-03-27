@@ -5,6 +5,9 @@ import hexlet.code.demo.model.User;
 import hexlet.code.demo.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,8 +29,19 @@ public class UserController {
     private UserRepository userRepository;
 
     @GetMapping
-    public List<User> getAllUsers(@RequestParam(defaultValue = "10") Integer limit) {
-        return userRepository.findAll().stream().limit(limit).toList();
+    public List<User> getAllUsers(
+        @RequestParam(defaultValue = "1") Integer page,
+        @RequestParam(defaultValue = "10") Integer size,
+        @RequestParam(defaultValue = "firstName,asc") String sort) {
+        String[] sortParts = sort.split(",");
+        var field = sortParts[0];
+        var direction = sortParts.length > 1 ? sortParts[1] : "asc";
+        Sort sortObj = direction.equalsIgnoreCase("desc")
+                       ? Sort.by(field).descending()
+                       : Sort.by(field).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sortObj);
+        return userRepository.findAll(pageable);
     }
 
     @PostMapping
