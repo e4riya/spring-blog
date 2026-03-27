@@ -45,8 +45,8 @@ public class UserController {
                        ? Sort.by(field).descending()
                        : Sort.by(field).ascending();
 
-        Pageable pageable = PageRequest.of(page, size, sortObj);
-        return userRepository.findSortedAll(pageable);
+        Pageable pageable = PageRequest.of(page - 1, size, sortObj);
+        return userRepository.findAll(pageable).getContent();
     }
 
     @PostMapping

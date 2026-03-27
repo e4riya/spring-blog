@@ -36,8 +36,8 @@ public class PostController {
     public ResponseEntity<List<Post>> getPublishedPosts(
         @RequestParam(defaultValue = "1") Integer page,
         @RequestParam(defaultValue = "10") Integer size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());// sort by desc
-        var res = postRepository.findAllPublishedTrue(pageable);
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());// sort by desc
+        var res = postRepository.findAllByPublishedTrue(pageable);
         return ResponseEntity.ok()
                              .header("X-Total-Count", String.valueOf(postRepository.count()))
                              .body(res);
