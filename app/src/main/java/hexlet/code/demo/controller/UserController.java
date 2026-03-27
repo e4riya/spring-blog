@@ -33,6 +33,11 @@ public class UserController {
         @RequestParam(defaultValue = "1") Integer page,
         @RequestParam(defaultValue = "10") Integer size,
         @RequestParam(defaultValue = "firstName,asc") String sort) {
+        /*можно юзануть как параметр Pageable,
+        и тогда будет тоже самое только дефолты поменяются:
+        page = 0 size = 20 сортировки не будет,
+        так же можно юзануть Pageable и @PageableDefault и установить дефолты
+        */
         String[] sortParts = sort.split(",");
         var field = sortParts[0];
         var direction = sortParts.length > 1 ? sortParts[1] : "asc";
@@ -41,7 +46,7 @@ public class UserController {
                        : Sort.by(field).ascending();
 
         Pageable pageable = PageRequest.of(page, size, sortObj);
-        return userRepository.findAll(pageable);
+        return userRepository.findSortedAll(pageable);
     }
 
     @PostMapping
