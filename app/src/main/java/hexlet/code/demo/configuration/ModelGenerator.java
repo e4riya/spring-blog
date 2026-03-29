@@ -36,7 +36,7 @@ public class ModelGenerator {
             } while (postRepository.existsByTitle(title));
             post.setTitle(title);
 
-            post.setContent(faker.lorem().paragraph());
+            post.setContent(faker.lorem().characters(200));;
             post.setPublished(faker.bool().bool());
             postRepository.save(post);
         }
