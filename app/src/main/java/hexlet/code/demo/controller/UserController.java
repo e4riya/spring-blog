@@ -47,6 +47,9 @@ public class UserController {
 
         Pageable pageable = PageRequest.of(page - 1, size, sortObj);
         return userRepository.findAll(pageable).getContent();
+        /*без getContent() вернет обьект Page, состоящий из контента,
+        и метаданных пагинации(в целом полезненько, можно юзать и Page
+        */
     }
 
     @PostMapping

@@ -42,6 +42,7 @@ public class User {
     private String firstName;
 
     private String lastName;
+    @Column(secondPrecision = 6)
     private LocalDateTime birthday;
 
     @Column(nullable = false, updatable = false)
