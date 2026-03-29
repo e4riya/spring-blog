@@ -60,6 +60,5 @@ sonar {
 	properties {
 		property("sonar.projectKey", "e4riya_spring-blog")
 		property("sonar.organization", "e4riya")
-		property("sonar.host.url", "https://sonarcloud.io")
 	}
 }
